@@ -1,7 +1,7 @@
 {
   "apps": [
     {
-      "name": "quiz-fullstack",
+      "name": "fullstack-quiz",
       "script": "yarn",
       "args": "start",
       "autorestart": true,

@@ -22,15 +22,15 @@ jobs:
             echo "Conteúdo de /projects:"
             ls -la /root/projects
 
-            if [ ! -d "/root/projects/quiz-fullstack/.git" ]; then
+            if [ ! -d "/root/projects/fullstack-quiz/.git" ]; then
                 echo "Clonando repositório..."
-                git clone https://github.com/jnerydesigner/quiz-fullstack.git /root/projects/quiz-fullstack
+                git clone https://github.com/jnerydesigner/fullstack-quiz.git /root/projects/fullstack-quiz
             else
                 echo "Repositório já clonado"
             fi
 
             echo "Entrando na pasta do projeto"
-            cd /root/projects/quiz-fullstack
+            cd /root/projects/fullstack-quiz
             echo "PWD após cd:"
             pwd
             echo "Conteúdo da pasta do projeto:"
@@ -46,7 +46,7 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd /root/projects/quiz-fullstack/quiz-fullstack
+            cd /root/projects/fullstack-quiz/quiz-fullstack
             yarn install
 
       - name: Executar o Build No Servidor
@@ -56,7 +56,7 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd /root/projects/quiz-fullstack/quiz-fullstack
+            cd /root/projects/fullstack-quiz/quiz-fullstack
             yarn build
 
       - name: Executar o PM2 e Start No Servidor
@@ -66,6 +66,6 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd /root/projects/quiz-fullstack/quiz-fullstack
-            pm2 update quiz-fullstack || true
+            cd /root/projects/fullstack-quiz/quiz-fullstack
+            pm2 update fullstack-quiz || true
             pm2 start my-pm2-start.json --update-env || pm2 restart my-pm2-start.json
