@@ -1,0 +1,46 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id      Int          @id @default(autoincrement())
+  name    String
+  answers UserAnswer[]        // <- inverso de UserAnswer.user
+}
+
+model Questions {
+  id       Int       @id @default(autoincrement())
+  question String
+  options  Options[]          // <- inverso de Options.question
+  answers  UserAnswer[]       // <- **ADICIONE ESTE** (inverso de UserAnswer.question)
+}
+
+model Options {
+  id         Int        @id @default(autoincrement())
+  response   String
+  isCorrect  Boolean    @default(false)
+  questionId Int
+  question   Questions  @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  answers    UserAnswer[]       // <- inverso de UserAnswer.option (opcional, mas útil)
+}
+
+model UserAnswer {
+  id         Int       @id @default(autoincrement())
+  userId     Int
+  questionId Int
+  optionId   Int
+  createdAt  DateTime  @default(now())
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question Questions @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  option   Options   @relation(fields: [optionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, questionId]) // uma resposta por usuário por pergunta
+  @@index([questionId])
+  @@index([optionId])
+}
