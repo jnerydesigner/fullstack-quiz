@@ -16,7 +16,7 @@ export default function Scoreboard() {
               key={i}
               className="flex justify-between bg-purple-50 p-3 rounded-lg"
             >
-              <span className="font-semibold">{r.name}</span>
+              <span className="font-semibold text-amber-800">{r.name}</span>
               <span>{r.percentage.toFixed(1)}%</span>
             </li>
           ))}

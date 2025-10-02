@@ -2,12 +2,25 @@
 
 import { useState } from "react";
 import { CheckCircle, XCircle, RotateCcw } from "lucide-react";
-import { questions } from "@/data/questions";
+import { questions as questionsMock } from "@/data/questions";
 import { useQuiz } from "@/context/QuizContext";
+import { useQuery } from "@tanstack/react-query";
+import { fetchAllQuestions } from "@/api/fetch-questions";
+import { QuestionsTypeFull } from "@/data/questions";
 
 export default function QuizApp() {
   const { addResult } = useQuiz();
 
+  const query = useQuery<QuestionsTypeFull[]>({
+    queryKey: ["all-questions"],
+    queryFn: fetchAllQuestions,
+    staleTime: 1000 * 60,
+  });
+
+  // fallback: se a API não respondeu, usa mock
+  const questions = query.data || questionsMock;
+
+  // estados do quiz
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showResult, setShowResult] = useState(false);
@@ -15,20 +28,21 @@ export default function QuizApp() {
   const [answered, setAnswered] = useState(false);
   const [username, setUsername] = useState("");
 
+  // responder questão
   const handleAnswer = (index: number) => {
     if (answered) return;
-
     setSelectedAnswer(index);
     setAnswered(true);
 
     if (index === questions[currentQuestion].correct) {
-      setScore(score + 1);
+      setScore((s) => s + 1);
     }
   };
 
+  // avançar questão
   const handleNext = () => {
     if (currentQuestion < questions.length - 1) {
-      setCurrentQuestion(currentQuestion + 1);
+      setCurrentQuestion((q) => q + 1);
       setSelectedAnswer(null);
       setAnswered(false);
     } else {
@@ -36,6 +50,7 @@ export default function QuizApp() {
     }
   };
 
+  // resetar quiz
   const resetQuiz = () => {
     setCurrentQuestion(0);
     setSelectedAnswer(null);
@@ -45,6 +60,16 @@ export default function QuizApp() {
     setUsername("");
   };
 
+  // tela de loading
+  if (query.isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <h2 className="text-lg font-semibold">Carregando perguntas...</h2>
+      </div>
+    );
+  }
+
+  // tela de resultado
   if (showResult) {
     const percentage = (score / questions.length) * 100;
 
@@ -89,13 +114,12 @@ export default function QuizApp() {
             )}
           </div>
 
-          {/* Campo para inserir o nome */}
           <input
             type="text"
             placeholder="Digite seu nome"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className="border rounded-lg px-4 py-2 w-full mb-4 text-center"
+            className="border rounded-lg px-4 py-2 w-full mb-4 text-center text-amber-800"
           />
 
           <button
@@ -111,7 +135,11 @@ export default function QuizApp() {
     );
   }
 
+  // questão atual
   const question = questions[currentQuestion];
+
+  console.log("Question", question);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-600 via-pink-500 to-red-500 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 max-w-2xl w-full">
@@ -148,7 +176,7 @@ export default function QuizApp() {
 
             return (
               <button
-                key={index}
+                key={option.id}
                 onClick={() => handleAnswer(index)}
                 disabled={answered}
                 className={`w-full text-left p-4 rounded-lg border-2 transition-all duration-200 flex items-center justify-between
@@ -163,7 +191,9 @@ export default function QuizApp() {
                   ${answered && "cursor-not-allowed"}
                 `}
               >
-                <span className="font-medium text-gray-800">{option}</span>
+                <span className="font-medium text-gray-800">
+                  {option.response}
+                </span>
                 {showCorrect && (
                   <CheckCircle className="text-green-500" size={24} />
                 )}

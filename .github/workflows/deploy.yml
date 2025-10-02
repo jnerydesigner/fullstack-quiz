@@ -39,7 +39,7 @@ jobs:
             echo "Executando git pull"
             git pull origin main
 
-      - name: Instalar as dependencias
+      - name: Instalar as dependencias Front e Back
         uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ secrets.HOST }}
@@ -47,6 +47,8 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /root/projects/fullstack-quiz/quiz-fullstack
+            yarn install
+            cd /root/projects/fullstack-quiz/backend-quiz
             yarn install
 
       - name: Executar o Build No Servidor
@@ -58,6 +60,8 @@ jobs:
           script: |
             cd /root/projects/fullstack-quiz/quiz-fullstack
             yarn build
+            cd /root/projects/fullstack-quiz/backend-quiz
+            yarn build
 
       - name: Executar o PM2 e Start No Servidor
         uses: appleboy/ssh-action@v0.1.7
@@ -66,6 +70,10 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            cd /root/projects/fullstack-quiz/backend-quiz
+            pm2 update backend-quiz || true
+            pm2 start my-pm2-start.json --update-env || pm2 restart my-pm2-start.json
+
             cd /root/projects/fullstack-quiz/quiz-fullstack
             pm2 update fullstack-quiz || true
             pm2 start my-pm2-start.json --update-env || pm2 restart my-pm2-start.json
