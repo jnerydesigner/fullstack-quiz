@@ -1,12 +1,15 @@
 import { PrismaService } from '@/database/prisma.service';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 
 @Injectable()
 export class QuestionsService {
-  constructor(private readonly prisma: PrismaService) {}
+  private logger: Logger;
+  constructor(private readonly prisma: PrismaService) {
+    this.logger = new Logger(QuestionsService.name);
+  }
 
   async findAll() {
-    return this.prisma.questions.findMany({
+    const questions = await this.prisma.questions.findMany({
       include: {
         options: true,
       },
@@ -14,6 +17,10 @@ export class QuestionsService {
         id: 'asc',
       },
     });
+
+    this.logger.log(JSON.stringify(questions));
+
+    return questions;
   }
 
   async createQuestion(question: string) {
