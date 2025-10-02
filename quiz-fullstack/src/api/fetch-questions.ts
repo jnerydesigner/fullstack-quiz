@@ -1,6 +1,9 @@
 import { mapApiQuestions } from "@/data/mapApiQuestions";
 
-const URL_BASE = "http://localhost:6688";
+const URL_BASE =
+  process.env.NEXT_PUBLIC_BASE_API === undefined
+    ? "http://localhost:6688"
+    : process.env.NEXT_PUBLIC_BASE_API;
 
 export const fetchAllQuestions = async () => {
   const response = await fetch(`${URL_BASE}/questions`, {
